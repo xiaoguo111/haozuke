@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { loginApi } from '@/api/user.js'
+import { loginApi } from '@/api'
 export default {
   data () {
     return {
@@ -38,8 +38,22 @@ export default {
       this.$router.back()
     },
     async onSubmit () {
-      const res = await loginApi(this.username, this.password)
-      console.log('登录成功', res)
+      try {
+        const res = await loginApi(this.username, this.password)
+        this.$toast.loading({
+          message: '登录中...',
+          forbidClick: true
+        })
+        if (res.data.status !== 200) {
+          return this.$toast.fail(res.data.description)
+        }
+        console.log('登陆数据', res)
+        this.$store.commit('setUser', res.data.body)
+        this.$toast.success(res.data.description)
+        this.$router.push({
+          path: '/myde'
+        })
+      } catch (err) {}
     }
   }
 }
@@ -57,8 +71,10 @@ export default {
 }
 .van-cell {
   padding: 30px 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px solid #eee;
   font-size: 19px;
+  width: 91%;
+  margin-left: 16px;
 }
 .van-button--info {
   background-color: #1cb676;
@@ -66,5 +82,9 @@ export default {
 .hi {
   font-size: 14px;
   color: #666;
+}
+:deep(.van-cell__value) {
+  margin-left: -14px;
+  margin-right: -16px;
 }
 </style>
